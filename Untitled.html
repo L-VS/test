@@ -1,0 +1,1832 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Blink OS - Navigateur Premium</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="manifest" href="manifest.json">
+    <style>
+        /* CSS intégré pour Blink OS */
+        :root {
+            --primary: #5e35b1;
+            --secondary: #7e57c2;
+            --accent: #ff4081;
+            --dark: #1a1a2e;
+            --light: #f5f5f5;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --danger: #f44336;
+            --radius: 12px;
+            --transition: all 0.3s ease;
+            --background-url: url('https://images.unsplash.com/photo-1519681393784-d120267933ba');
+            --glass-bg: rgba(30, 30, 46, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --blur-amount: 10px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: linear-gradient(rgba(10, 10, 20, 0.85), rgba(15, 15, 30, 0.9)), var(--background-url);
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: var(--light);
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+            touch-action: manipulation;
+            transition: background 1s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        /* Interface principale */
+        .app-container {
+            display: grid;
+            grid-template-rows: 70px 1fr 80px;
+            height: 100vh;
+            position: relative;
+        }
+
+        /* Header */
+        .app-header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--blur-amount));
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            border-bottom: 1px solid var(--glass-border);
+            z-index: 100;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            color: var(--accent);
+            font-size: 24px;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--accent), #ff79a9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .search-container {
+            flex: 1;
+            margin: 0 20px;
+            position: relative;
+        }
+
+        .search-bar {
+            width: 100%;
+            background: rgba(20, 20, 35, 0.8);
+            border: 2px solid rgba(126, 87, 194, 0.4);
+            border-radius: 30px;
+            padding: 12px 20px 12px 45px;
+            color: white;
+            font-size: 16px;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .search-bar:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(255, 64, 129, 0.3);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .voice-search {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent);
+            cursor: pointer;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .header-btn {
+            background: rgba(94, 53, 177, 0.6);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .header-btn:hover {
+            background: var(--accent);
+            transform: scale(1.1);
+        }
+
+        /* Contenu principal */
+        .main-content {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: rgba(25, 25, 40, 0.85);
+            backdrop-filter: blur(var(--blur-amount));
+            border-right: 1px solid var(--glass-border);
+            padding: 20px 0;
+            overflow-y: auto;
+            z-index: 50;
+            transition: var(--transition);
+        }
+
+        .sidebar-section {
+            margin-bottom: 25px;
+        }
+
+        .sidebar-title {
+            padding: 0 20px 10px;
+            font-size: 14px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.6);
+            letter-spacing: 1px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background: rgba(126, 87, 194, 0.2);
+            color: white;
+        }
+
+        .nav-item.active {
+            background: rgba(94, 53, 177, 0.4);
+            color: white;
+            border-left: 3px solid var(--accent);
+        }
+
+        .nav-icon {
+            margin-right: 15px;
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+
+        /* Browser View */
+        .browser-view {
+            display: flex;
+            flex-direction: column;
+            background: #0f0f1a;
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .browser-controls {
+            display: flex;
+            padding: 10px 15px;
+            background: var(--glass-bg);
+            border-bottom: 1px solid var(--glass-border);
+            gap: 10px;
+        }
+
+        .control-btn {
+            background: rgba(40, 40, 60, 0.7);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .control-btn:hover {
+            background: var(--secondary);
+        }
+
+        .url-bar {
+            flex: 1;
+            background: rgba(20, 20, 35, 0.8);
+            border: 2px solid rgba(126, 87, 194, 0.4);
+            border-radius: 30px;
+            padding: 10px 20px;
+            color: white;
+            font-size: 14px;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .url-bar:focus {
+            border-color: var(--accent);
+        }
+
+        .webview-container {
+            flex: 1;
+            overflow: auto;
+            position: relative;
+        }
+
+        .webview {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: white;
+        }
+
+        /* Page d'accueil améliorée */
+        .home-view {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 20px;
+            text-align: center;
+            background: rgba(15, 15, 26, 0.7);
+            backdrop-filter: blur(5px);
+        }
+
+        .home-logo {
+            font-size: 72px;
+            margin-bottom: 20px;
+            color: var(--accent);
+            text-shadow: 0 0 20px rgba(255, 64, 129, 0.5);
+        }
+
+        .home-title {
+            font-size: 36px;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, var(--accent), #ff79a9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .home-subtitle {
+            font-size: 18px;
+            margin-bottom: 40px;
+            max-width: 600px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .home-search-container {
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .home-search {
+            width: 100%;
+            background: rgba(20, 20, 35, 0.8);
+            border: 2px solid rgba(126, 87, 194, 0.4);
+            border-radius: 30px;
+            padding: 15px 25px 15px 50px;
+            color: white;
+            font-size: 18px;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .home-search:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(255, 64, 129, 0.3);
+        }
+
+        .home-search-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .home-voice-search {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent);
+            cursor: pointer;
+            background: rgba(94, 53, 177, 0.3);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .home-voice-search:hover {
+            background: var(--accent);
+            color: white;
+        }
+
+        .quick-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            max-width: 800px;
+        }
+
+        .quick-link {
+            background: rgba(40, 40, 60, 0.7);
+            border-radius: var(--radius);
+            padding: 15px 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(126, 87, 194, 0.3);
+        }
+
+        .quick-link:hover {
+            background: rgba(94, 53, 177, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Joy-Con Controls */
+        .joycon-controls {
+            position: absolute;
+            bottom: 90px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 200;
+        }
+
+        .joycon-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(255, 64, 129, 0.8);
+            backdrop-filter: blur(5px);
+            border: 2px solid white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .joycon-btn:hover {
+            transform: scale(1.1);
+            background: var(--accent);
+        }
+
+        /* Footer */
+        .app-footer {
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--blur-amount));
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 10px;
+            border-top: 1px solid var(--glass-border);
+            z-index: 100;
+        }
+
+        .footer-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 15px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: var(--transition);
+            cursor: pointer;
+            border-radius: var(--radius);
+            min-width: 70px;
+        }
+
+        .footer-btn:hover, .footer-btn.active {
+            color: var(--accent);
+            background: rgba(94, 53, 177, 0.2);
+        }
+
+        .footer-icon {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .footer-text {
+            font-size: 12px;
+        }
+
+        /* Mode Plein Écran */
+        .fullscreen-mode .sidebar {
+            transform: translateX(-100%);
+        }
+
+        .fullscreen-mode .joycon-controls {
+            display: none;
+        }
+
+        /* Vue Paramètres */
+        .settings-view {
+            padding: 20px;
+            overflow-y: auto;
+            background: rgba(15, 15, 26, 0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .settings-section {
+            background: rgba(40, 40, 60, 0.7);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .settings-title {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .settings-title i {
+            font-size: 24px;
+        }
+
+        .settings-option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .settings-option:last-child {
+            border-bottom: none;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .option-label i {
+            width: 24px;
+            text-align: center;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.2);
+            transition: var(--transition);
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: var(--transition);
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .theme-selector {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .theme-color {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: var(--transition);
+        }
+
+        .theme-color.active {
+            border-color: white;
+            transform: scale(1.2);
+        }
+
+        .background-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .background-option {
+            height: 80px;
+            border-radius: var(--radius);
+            background-size: cover;
+            background-position: center;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: var(--transition);
+        }
+
+        .background-option.active {
+            border-color: var(--accent);
+            transform: scale(1.05);
+        }
+
+        /* Notifications */
+        .notification {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(94, 53, 177, 0.9);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 30px;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s, fadeOut 0.3s 2s forwards;
+        }
+
+        /* Vue Cloud Gaming */
+        .cloud-gaming-view {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .cloud-card {
+            width: 100%;
+            max-width: 800px;
+            background: var(--glass-bg);
+            border-radius: var(--radius);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+        }
+
+        .cloud-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .cloud-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .cloud-title {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .cloud-desc {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 10px;
+        }
+
+        .cloud-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+        }
+
+        .cloud-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Vue OS */
+        .os-view {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .os-card {
+            background: var(--glass-bg);
+            border-radius: var(--radius);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .os-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+        }
+
+        .os-icon {
+            font-size: 48px;
+            color: var(--accent);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .os-title {
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        /* Clavier virtuel */
+        .virtual-keyboard {
+            position: fixed;
+            bottom: 80px;
+            left: 0;
+            right: 0;
+            background: var(--glass-bg);
+            backdrop-filter: blur(var(--blur-amount));
+            padding: 15px;
+            border-top: 1px solid var(--glass-border);
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 5px;
+            z-index: 300;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .virtual-keyboard.active {
+            transform: translateY(0);
+        }
+
+        .keyboard-key {
+            background: rgba(40, 40, 60, 0.7);
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            color: white;
+            font-size: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .keyboard-key:hover {
+            background: var(--secondary);
+        }
+
+        .keyboard-key.special {
+            background: rgba(94, 53, 177, 0.6);
+        }
+
+        /* Vue Sociale */
+        .social-view {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            gap: 15px;
+            overflow-y: auto;
+        }
+
+        .chat-message {
+            max-width: 80%;
+            padding: 12px 15px;
+            border-radius: 18px;
+            background: var(--glass-bg);
+            align-self: flex-start;
+        }
+
+        .chat-message.self {
+            background: var(--accent);
+            align-self: flex-end;
+        }
+
+        .chat-input-container {
+            display: flex;
+            padding: 10px 15px;
+            background: var(--glass-bg);
+            border-top: 1px solid var(--glass-border);
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: rgba(20, 20, 35, 0.8);
+            border: 2px solid rgba(126, 87, 194, 0.4);
+            border-radius: 30px;
+            padding: 10px 20px;
+            color: white;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .chat-send-btn {
+            background: var(--accent);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        /* Vue Fichiers */
+        .files-view {
+            padding: 20px;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+        }
+
+        .file-item {
+            background: rgba(40, 40, 60, 0.7);
+            border-radius: var(--radius);
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .file-item:hover {
+            transform: translateY(-5px);
+            background: rgba(94, 53, 177, 0.4);
+        }
+
+        .file-icon {
+            font-size: 36px;
+            margin-bottom: 10px;
+            color: var(--accent);
+        }
+
+        .file-name {
+            font-size: 12px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                position: absolute;
+                left: 0;
+                top: 70px;
+                bottom: 80px;
+                width: 280px;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                z-index: 150;
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .os-view {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, 20px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translate(-50%, 0); }
+            to { opacity: 0; transform: translate(-50%, 20px); }
+        }
+        
+        /* Animation de micro */
+        .pulse {
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="logo">
+                <div class="logo-icon"><i class="fas fa-bolt"></i></div>
+                <div class="logo-text">Blink OS</div>
+            </div>
+            
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-bar" id="search-input" placeholder="Rechercher ou entrer une adresse web">
+                <i class="fas fa-microphone voice-search" id="voice-search" title="Recherche vocale"></i>
+            </div>
+            
+            <div class="header-actions">
+                <button class="header-btn" id="sidebar-toggle"><i class="fas fa-bars"></i></button>
+                <button class="header-btn" id="fullscreen-toggle"><i class="fas fa-expand"></i></button>
+                <button class="header-btn" id="keyboard-toggle"><i class="fas fa-keyboard"></i></button>
+            </div>
+        </header>
+        
+        <div class="main-content">
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Navigation</div>
+                    <div class="nav-item active" data-view="home">
+                        <i class="fas fa-home nav-icon"></i>
+                        <span>Accueil</span>
+                    </div>
+                    <div class="nav-item" data-view="browser">
+                        <i class="fas fa-globe nav-icon"></i>
+                        <span>Navigateur</span>
+                    </div>
+                    <div class="nav-item" data-view="apps">
+                        <i class="fas fa-th nav-icon"></i>
+                        <span>Applications</span>
+                    </div>
+                </div>
+                
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Cloud & OS</div>
+                    <div class="nav-item" data-view="android">
+                        <i class="fab fa-android nav-icon"></i>
+                        <span>Android Cloud</span>
+                    </div>
+                    <div class="nav-item" data-view="gaming">
+                        <i class="fas fa-gamepad nav-icon"></i>
+                        <span>Cloud Gaming</span>
+                    </div>
+                    <div class="nav-item" data-view="os">
+                        <i class="fas fa-desktop nav-icon"></i>
+                        <span>Systèmes d'exploitation</span>
+                    </div>
+                </div>
+                
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Social</div>
+                    <div class="nav-item" data-view="chat">
+                        <i class="fas fa-comments nav-icon"></i>
+                        <span>Messagerie</span>
+                    </div>
+                    <div class="nav-item" data-view="friends">
+                        <i class="fas fa-user-friends nav-icon"></i>
+                        <span>Amis</span>
+                    </div>
+                </div>
+                
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Outils</div>
+                    <div class="nav-item" data-view="files">
+                        <i class="fas fa-folder nav-icon"></i>
+                        <span>Fichiers</span>
+                    </div>
+                    <div class="nav-item" data-view="media">
+                        <i class="fas fa-play-circle nav-icon"></i>
+                        <span>Média</span>
+                    </div>
+                    <div class="nav-item" data-view="settings">
+                        <i class="fas fa-cog nav-icon"></i>
+                        <span>Paramètres</span>
+                    </div>
+                </div>
+            </aside>
+            
+            <main class="content-view">
+                <!-- Vue d'accueil améliorée -->
+                <div class="home-view" id="home-view">
+                    <div class="home-logo">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h1 class="home-title">Blink OS</h1>
+                    <p class="home-subtitle">Votre univers numérique sur Nintendo Switch</p>
+                    
+                    <div class="home-search-container">
+                        <i class="fas fa-search home-search-icon"></i>
+                        <input type="text" class="home-search" id="home-search-input" placeholder="Rechercher sur le web ou entrer une adresse">
+                        <div class="home-voice-search" id="home-voice-search">
+                            <i class="fas fa-microphone"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="quick-links">
+                        <div class="quick-link" data-url="https://youtube.com">
+                            <i class="fab fa-youtube"></i>
+                            <span>YouTube</span>
+                        </div>
+                        <div class="quick-link" data-url="https://netflix.com">
+                            <i class="fab fa-netflix"></i>
+                            <span>Netflix</span>
+                        </div>
+                        <div class="quick-link" data-url="https://poki.com">
+                            <i class="fas fa-gamepad"></i>
+                            <span>Jeux en ligne</span>
+                        </div>
+                        <div class="quick-link" data-url="https://github.com">
+                            <i class="fab fa-github"></i>
+                            <span>GitHub</span>
+                        </div>
+                        <div class="quick-link" data-url="https://wikipedia.org">
+                            <i class="fab fa-wikipedia-w"></i>
+                            <span>Wikipedia</span>
+                        </div>
+                        <div class="quick-link" data-url="https://appetize.io">
+                            <i class="fas fa-mobile-alt"></i>
+                            <span>Appetize.io</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Vue navigateur -->
+                <div class="browser-view" id="browser-view" style="display:none;">
+                    <div class="browser-controls">
+                        <button class="control-btn" id="back-btn"><i class="fas fa-arrow-left"></i></button>
+                        <button class="control-btn" id="forward-btn"><i class="fas fa-arrow-right"></i></button>
+                        <button class="control-btn" id="refresh-btn"><i class="fas fa-sync"></i></button>
+                        <input type="text" class="url-bar" id="url-input" value="https://google.com">
+                        <button class="control-btn" id="go-btn"><i class="fas fa-arrow-right"></i></button>
+                    </div>
+                    <div class="webview-container">
+                        <iframe class="webview" id="webview" src="about:blank"></iframe>
+                    </div>
+                </div>
+                
+                <!-- Vue Cloud Gaming -->
+                <div class="cloud-gaming-view" id="gaming-view" style="display:none;">
+                    <div class="cloud-card">
+                        <div class="cloud-header">
+                            <div class="cloud-icon">
+                                <i class="fab fa-nvidia"></i>
+                            </div>
+                            <div>
+                                <div class="cloud-title">GeForce NOW</div>
+                                <div class="cloud-desc">Jeux PC en streaming haute performance</div>
+                            </div>
+                        </div>
+                        <button class="cloud-btn" id="geforce-btn">
+                            <i class="fas fa-play"></i> Démarrer GeForce NOW
+                        </button>
+                    </div>
+                    
+                    <div class="cloud-card">
+                        <div class="cloud-header">
+                            <div class="cloud-icon">
+                                <i class="fab fa-xbox"></i>
+                            </div>
+                            <div>
+                                <div class="cloud-title">Xbox Cloud Gaming</div>
+                                <div class="cloud-desc">Bibliothèque Xbox Game Pass</div>
+                            </div>
+                        </div>
+                        <button class="cloud-btn" id="xcloud-btn">
+                            <i class="fas fa-play"></i> Démarrer Xbox Cloud
+                        </button>
+                    </div>
+                    
+                    <div class="cloud-card">
+                        <div class="cloud-header">
+                            <div class="cloud-icon">
+                                <i class="fab fa-google"></i>
+                            </div>
+                            <div>
+                                <div class="cloud-title">Google Stadia</div>
+                                <div class="cloud-desc">Jeux sans téléchargement</div>
+                            </div>
+                        </div>
+                        <button class="cloud-btn" id="stadia-btn">
+                            <i class="fas fa-play"></i> Démarrer Stadia
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Vue Systèmes d'exploitation -->
+                <div class="os-view" id="os-view" style="display:none;">
+                    <div class="os-card" data-os="android">
+                        <div class="os-icon">
+                            <i class="fab fa-android"></i>
+                        </div>
+                        <div class="os-title">Android OS</div>
+                        <div class="cloud-desc">Système d'exploitation mobile</div>
+                        <button class="cloud-btn">
+                            <i class="fas fa-play"></i> Démarrer
+                        </button>
+                    </div>
+                    
+                    <div class="os-card" data-os="ubuntu">
+                        <div class="os-icon">
+                            <i class="fab fa-ubuntu"></i>
+                        </div>
+                        <div class="os-title">Ubuntu Desktop</div>
+                        <div class="cloud-desc">Environnement Linux complet</div>
+                        <button class="cloud-btn">
+                            <i class="fas fa-play"></i> Démarrer
+                        </button>
+                    </div>
+                    
+                    <div class="os-card" data-os="windows">
+                        <div class="os-icon">
+                            <i class="fab fa-windows"></i>
+                        </div>
+                        <div class="os-title">Windows 10</div>
+                        <div class="cloud-desc">Système d'exploitation de bureau</div>
+                        <button class="cloud-btn">
+                            <i class="fas fa-play"></i> Démarrer
+                        </button>
+                    </div>
+                    
+                    <div class="os-card" data-os="chrome">
+                        <div class="os-icon">
+                            <i class="fab fa-chrome"></i>
+                        </div>
+                        <div class="os-title">Chrome OS</div>
+                        <div class="cloud-desc">Système basé sur le navigateur</div>
+                        <button class="cloud-btn">
+                            <i class="fas fa-play"></i> Démarrer
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Vue Paramètres personnalisables -->
+                <div class="settings-view" id="settings-view" style="display:none;">
+                    <div class="settings-section">
+                        <h2 class="settings-title"><i class="fas fa-user"></i> Mon Compte</h2>
+                        <div class="settings-option">
+                            <div class="option-label">
+                                <i class="fas fa-user"></i>
+                                <span>Nom d'utilisateur</span>
+                            </div>
+                            <input type="text" id="username" value="Gamer123" class="url-bar" style="width: auto; padding: 5px 10px;">
+                        </div>
+                        <div class="settings-option">
+                            <div class="option-label">
+                                <i class="fas fa-envelope"></i>
+                                <span>Email</span>
+                            </div>
+                            <input type="email" id="email" value="gamer@example.com" class="url-bar" style="width: auto; padding: 5px 10px;">
+                        </div>
+                        <div class="settings-option">
+                            <div class="option-label">
+                                <i class="fas fa-key"></i>
+                                <span>Mot de passe</span>
+                            </div>
+                            <button class="control-btn" id="change-password">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-section">
+                        <h2 class="settings-title"><i class="fas fa-palette"></i> Personnalisation</h2>
+                        <div class="settings-option">
+                            <div class="option-label">
+                                <i class="fas fa-moon"></i>
+                                <span>Mode sombre</span>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="dark-mode" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="settings-option">
+                            <div class="option-label">
+                                <i class="fas fa-paint-brush"></i>
+                                <span>Couleur d'accent</span>
+                            </div>
+                            <div class="theme-selector">
+                                <div class="theme-color" data-color="#ff4081" style="background:#ff4081;"></div>
+                                <div class="theme-color" data-color="#35b1ff" style="background:#35b1ff;"></div>
+                                <div class="theme-color" data-color="#4caf50" style="background:#4caf50;"></div>
+                                <div class="theme-color" data-color="#ff9800" style="background:#ff9800;"></div>
+                                <div class="theme-color" data-color="#9c27b0" style="background:#9c27b0;"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="settings-option">
+                            <div class="option-label">
+                                <i class="fas fa-image"></i>
+                                <span>Fond d'écran</span>
+                            </div>
+                            <div class="background-selector">
+                                <div class="background-option active" data-bg="https://images.unsplash.com/photo-1519681393784-d120267933ba" style="background-image:url('https://images.unsplash.com/photo-1519681393784-d120267933ba')"></div>
+                                <div class="background-option" data-bg="https://images.unsplash.com/photo-1485470733090-0aae1788d5af" style="background-image:url('https://images.unsplash.com/photo-1485470733090-0aae1788d5af')"></div>
+                                <div class="background-option" data-bg="https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07" style="background-image:url('https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07')"></div>
+                                <div class="background-option" data-bg="https://images.unsplash.com/photo-1505506874110-6a7a69069a08" style="background-image:url('https://images.unsplash.com/photo-1505506874110-6a7a69069a08')"></div>
+                                <div class="background-option" data-bg="https://images.unsplash.com/photo-1475274047050-1d0c0975c63e" style="background-image:url('https://images.unsplash.com/photo-1475274047050-1d0c0975c63e')"></div>
+                                <div class="background-option" data-bg="https://images.unsplash.com/photo-1518837695005-2083093ee35b" style="background-image:url('https://images.unsplash.com/photo-1518837695005-2083093ee35b')"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-section">
+                        <h2 class="settings-title"><i class="fas fa-language"></i> Langue</h2>
+                        <div class="settings-option">
+                            <div class="option-label">
+                                <i class="fas fa-globe"></i>
+                                <span>Langue du système</span>
+                            </div>
+                            <select id="system-lang" class="url-bar" style="width: auto; padding: 5px 10px;">
+                                <option value="auto">Automatique</option>
+                                <option value="fr">Français</option>
+                                <option value="en">English</option>
+                                <option value="es">Español</option>
+                                <option value="de">Deutsch</option>
+                                <option value="ja">日本語</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Vue de chat social -->
+                <div class="social-view" id="chat-view" style="display:none;">
+                    <div class="chat-container" id="chat-messages">
+                        <div class="chat-message">
+                            Salut! Comment vas-tu?
+                        </div>
+                        <div class="chat-message self">
+                            Très bien, merci! J'adore Blink OS sur Switch!
+                        </div>
+                        <div class="chat-message">
+                            Tu as essayé le cloud gaming? C'est incroyable!
+                        </div>
+                    </div>
+                    <div class="chat-input-container">
+                        <input type="text" class="chat-input" id="chat-input" placeholder="Écrire un message...">
+                        <button class="chat-send-btn" id="chat-send">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Vue Fichiers -->
+                <div class="files-view" id="files-view" style="display:none;">
+                    <h2 style="margin-bottom: 20px;">Gestion des fichiers</h2>
+                    <div class="file-grid" id="file-grid">
+                        <!-- Les fichiers seront ajoutés dynamiquement -->
+                    </div>
+                </div>
+            </main>
+        </div>
+        
+        <!-- Clavier virtuel -->
+        <div class="virtual-keyboard" id="virtual-keyboard">
+            <!-- Les touches seront générées dynamiquement -->
+        </div>
+        
+        <!-- Contrôles Joy-Con -->
+        <div class="joycon-controls">
+            <div class="joycon-btn" id="joycon-up"><i class="fas fa-arrow-up"></i></div>
+            <div class="joycon-btn" id="joycon-right"><i class="fas fa-arrow-right"></i></div>
+            <div class="joycon-btn" id="joycon-down"><i class="fas fa-arrow-down"></i></div>
+            <div class="joycon-btn" id="joycon-left"><i class="fas fa-arrow-left"></i></div>
+            <div class="joycon-btn" id="joycon-a"><i class="fas fa-circle"></i></div>
+        </div>
+        
+        <!-- Footer de navigation -->
+        <footer class="app-footer">
+            <div class="footer-btn active" data-view="home">
+                <i class="fas fa-home footer-icon"></i>
+                <span class="footer-text">Accueil</span>
+            </div>
+            <div class="footer-btn" data-view="browser">
+                <i class="fas fa-compass footer-icon"></i>
+                <span class="footer-text">Naviguer</span>
+            </div>
+            <div class="footer-btn" data-view="gaming">
+                <i class="fas fa-gamepad footer-icon"></i>
+                <span class="footer-text">Gaming</span>
+            </div>
+            <div class="footer-btn" data-view="chat">
+                <i class="fas fa-comments footer-icon"></i>
+                <span class="footer-text">Social</span>
+            </div>
+            <div class="footer-btn" data-view="settings">
+                <i class="fas fa-cog footer-icon"></i>
+                <span class="footer-text">Paramètres</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Fichier JavaScript principal -->
+    <script>
+        // ==============================
+        // Configuration et initialisation
+        // ==============================
+        
+        // Détection de la langue du système
+        const systemLanguage = navigator.language.split('-')[0] || 'en';
+        document.getElementById('system-lang').value = systemLanguage;
+        
+        // Traduction basique
+        const translations = {
+            'fr': {
+                'searchPlaceholder': 'Rechercher ou entrer une adresse web',
+                'homeSearchPlaceholder': 'Rechercher sur le web ou entrer une adresse',
+                'welcome': 'Bienvenue sur Blink OS!'
+            },
+            'en': {
+                'searchPlaceholder': 'Search or enter web address',
+                'homeSearchPlaceholder': 'Search the web or enter address',
+                'welcome': 'Welcome to Blink OS!'
+            },
+            'es': {
+                'searchPlaceholder': 'Buscar o ingresar dirección web',
+                'homeSearchPlaceholder': 'Buscar en la web o ingresar dirección',
+                'welcome': '¡Bienvenido a Blink OS!'
+            },
+            'de': {
+                'searchPlaceholder': 'Suchen oder Webadresse eingeben',
+                'homeSearchPlaceholder': 'Im Web suchen oder Adresse eingeben',
+                'welcome': 'Willkommen bei Blink OS!'
+            },
+            'ja': {
+                'searchPlaceholder': '検索またはウェブアドレスを入力',
+                'homeSearchPlaceholder': 'ウェブを検索またはアドレスを入力',
+                'welcome': 'Blink OSへようこそ！'
+            }
+        };
+        
+        // Appliquer les traductions
+        function applyTranslations(lang) {
+            const t = translations[lang] || translations['en'];
+            document.getElementById('search-input').placeholder = t.searchPlaceholder;
+            document.getElementById('home-search-input').placeholder = t.homeSearchPlaceholder;
+        }
+        
+        applyTranslations(systemLanguage);
+        
+        // ==============================
+        // Gestion des vues
+        // ==============================
+        
+        const views = {
+            'home': document.getElementById('home-view'),
+            'browser': document.getElementById('browser-view'),
+            'gaming': document.getElementById('gaming-view'),
+            'os': document.getElementById('os-view'),
+            'settings': document.getElementById('settings-view'),
+            'chat': document.getElementById('chat-view'),
+            'files': document.getElementById('files-view')
+        };
+
+        // Navigation
+        function showView(viewId) {
+            // Masquer toutes les vues
+            Object.values(views).forEach(view => {
+                if (view) view.style.display = 'none';
+            });
+            
+            // Afficher la vue sélectionnée
+            if (views[viewId]) {
+                views[viewId].style.display = viewId === 'settings' || viewId === 'chat' || viewId === 'files' ? 'block' : 'flex';
+                
+                // Si c'est la vue navigateur, charger la page d'accueil par défaut
+                if (viewId === 'browser') {
+                    loadUrl('https://www.google.com');
+                }
+                
+                // Si c'est la vue fichiers, charger les fichiers
+                if (viewId === 'files') {
+                    loadFiles();
+                }
+            }
+            
+            // Mettre à jour la navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.footer-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Activer l'élément de navigation correspondant
+            const navItem = document.querySelector(`.nav-item[data-view="${viewId}"]`);
+            if (navItem) navItem.classList.add('active');
+            
+            const footerBtn = document.querySelector(`.footer-btn[data-view="${viewId}"]`);
+            if (footerBtn) footerBtn.classList.add('active');
+        }
+
+        // Initialiser les écouteurs d'événements
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const viewId = item.getAttribute('data-view');
+                if (viewId) showView(viewId);
+            });
+        });
+
+        document.querySelectorAll('.footer-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const viewId = btn.getAttribute('data-view');
+                if (viewId) showView(viewId);
+            });
+        });
+
+        // Toggle sidebar
+        document.getElementById('sidebar-toggle').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('active');
+        });
+
+        // Toggle plein écran
+        document.getElementById('fullscreen-toggle').addEventListener('click', () => {
+            document.querySelector('.app-container').classList.toggle('fullscreen-mode');
+        });
+
+        // ==============================
+        // Navigation dans le navigateur
+        // ==============================
+        
+        const webview = document.getElementById('webview');
+        const urlInput = document.getElementById('url-input');
+        const searchInput = document.getElementById('search-input');
+        const homeSearchInput = document.getElementById('home-search-input');
+
+        function loadUrl(url) {
+            try {
+                // Correction pour les URL incomplètes
+                if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                    url = 'https://' + url;
+                }
+                
+                webview.src = url;
+                urlInput.value = url;
+            } catch (e) {
+                createNotification('Impossible de charger la page');
+            }
+        }
+
+        function searchWeb(query) {
+            showView('browser');
+            loadUrl('https://www.google.com/search?q=' + encodeURIComponent(query));
+        }
+
+        document.getElementById('go-btn').addEventListener('click', () => {
+            loadUrl(urlInput.value);
+        });
+        
+        urlInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') loadUrl(urlInput.value);
+        });
+
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchWeb(searchInput.value);
+        });
+
+        homeSearchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchWeb(homeSearchInput.value);
+        });
+
+        document.getElementById('back-btn').addEventListener('click', () => {
+            try {
+                webview.contentWindow.history.back();
+            } catch (e) {
+                createNotification('Impossible de revenir en arrière');
+            }
+        });
+
+        document.getElementById('forward-btn').addEventListener('click', () => {
+            try {
+                webview.contentWindow.history.forward();
+            } catch (e) {
+                createNotification('Impossible d\'aller vers l\'avant');
+            }
+        });
+
+        document.getElementById('refresh-btn').addEventListener('click', () => {
+            try {
+                webview.contentWindow.location.reload();
+            } catch (e) {
+                createNotification('Impossible de recharger la page');
+            }
+        });
+
+        // Mise à jour de l'URL lors de la navigation
+        webview.addEventListener('load', () => {
+            try {
+                urlInput.value = webview.contentWindow.location.href;
+            } catch (e) {
+                // Ignorer les erreurs de cross-origin
+            }
+        });
+
+        // Liens rapides sur la page d'accueil
+        document.querySelectorAll('.quick-link').forEach(link => {
+            link.addEventListener('click', () => {
+                const url = link.getAttribute('data-url');
+                showView('browser');
+                loadUrl(url);
+            });
+        });
+
+        // ==============================
+        // Cloud Gaming
+        // ==============================
+        
+        document.getElementById('geforce-btn').addEventListener('click', () => {
+            showView('browser');
+            loadUrl('https://play.geforcenow.com');
+            createNotification('Lancement de GeForce NOW...');
+        });
+        
+        document.getElementById('xcloud-btn').addEventListener('click', () => {
+            showView('browser');
+            loadUrl('https://www.xbox.com/play');
+            createNotification('Lancement de Xbox Cloud Gaming...');
+        });
+        
+        document.getElementById('stadia-btn').addEventListener('click', () => {
+            showView('browser');
+            loadUrl('https://stadia.google.com');
+            createNotification('Lancement de Google Stadia...');
+        });
+
+        // ==============================
+        // Systèmes d'exploitation
+        // ==============================
+        
+        document.querySelectorAll('.os-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const os = card.getAttribute('data-os');
+                showView('browser');
+                
+                switch(os) {
+                    case 'android':
+                        loadUrl('https://appetize.io');
+                        createNotification('Lancement d\'Android OS...');
+                        break;
+                    case 'ubuntu':
+                        loadUrl('https://ubuntu.com');
+                        createNotification('Lancement d\'Ubuntu Desktop...');
+                        break;
+                    case 'windows':
+                        loadUrl('https://windows365.microsoft.com');
+                        createNotification('Lancement de Windows 10...');
+                        break;
+                    case 'chrome':
+                        loadUrl('https://chromeos.dev');
+                        createNotification('Lancement de Chrome OS...');
+                        break;
+                }
+            });
+        });
+
+        // ==============================
+        // Chat social
+        // ==============================
+        
+        document.getElementById('chat-send').addEventListener('click', () => {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            
+            if (message) {
+                const chatContainer = document.getElementById('chat-messages');
+                const messageElement = document.createElement('div');
+                messageElement.className = 'chat-message self';
+                messageElement.textContent = message;
+                chatContainer.appendChild(messageElement);
+                
+                // Réponse automatique
+                setTimeout(() => {
+                    const replies = [
+                        "C'est génial!",
+                        "Tu as essayé le nouveau jeu?",
+                        "Je suis d'accord",
+                        "Comment ça marche sur Switch?"
+                    ];
+                    const replyElement = document.createElement('div');
+                    replyElement.className = 'chat-message';
+                    replyElement.textContent = replies[Math.floor(Math.random() * replies.length)];
+                    chatContainer.appendChild(replyElement);
+                    
+                    // Défilement vers le bas
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                }, 1000);
+                
+                input.value = '';
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+        });
+        
+        document.getElementById('chat-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                document.getElementById('chat-send').click();
+            }
+        });
+
+        // ==============================
+        // Gestion des fichiers
+        // ==============================
+        
+        function loadFiles() {
+            const fileGrid = document.getElementById('file-grid');
+            fileGrid.innerHTML = '';
+            
+            // Fichiers simulés
+            const files = [
+                { name: 'Document.txt', type: 'text', icon: 'fas fa-file-alt' },
+                { name: 'Image.jpg', type: 'image', icon: 'fas fa-file-image' },
+                { name: 'Vidéo.mp4', type: 'video', icon: 'fas fa-file-video' },
+                { name: 'Musique.mp3', type: 'audio', icon: 'fas fa-file-audio' },
+                { name: 'Archive.zip', type: 'archive', icon: 'fas fa-file-archive' },
+                { name: 'Présentation.pdf', type: 'pdf', icon: 'fas fa-file-pdf' }
+            ];
+            
+            files.forEach(file => {
+                const fileElement = document.createElement('div');
+                fileElement.className = 'file-item';
+                fileElement.innerHTML = `
+                    <div class="file-icon"><i class="${file.icon}"></i></div>
+                    <div class="file-name">${file.name}</div>
+                `;
+                
+                fileElement.addEventListener('click', () => {
+                    openFile(file);
+                });
+                
+                fileGrid.appendChild(fileElement);
+            });
+        }
+        
+        function openFile(file) {
+            let message = '';
+            switch(file.type) {
+                case 'text':
+                    message = 'Ouverture du document texte';
+                    break;
+                case 'image':
+                    message = 'Affichage de l\'image';
+                    break;
+                case 'video':
+                    message = 'Lecture de la vidéo';
+                    break;
+                case 'audio':
+                    message = 'Écoute du fichier audio';
+                    break;
+                case 'archive':
+                    message = 'Extraction de l\'archive';
+                    break;
+                case 'pdf':
+                    message = 'Ouverture du document PDF';
+                    break;
+            }
+            
+            createNotification(message);
+        }
+
+        // ==============================
+        // Clavier virtuel
+        // ==============================
+        
+        const keyboard = document.getElementById('virtual-keyboard');
+        const keyboardKeys = [
+            '1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
+            'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p',
+            'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', '↵',
+            'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '⌫',
+            'Espace', '&', '@', '#', '$', '%', '?', '!', "'", '⇧'
+        ];
+        
+        // Générer les touches du clavier
+        keyboardKeys.forEach(key => {
+            const keyElement = document.createElement('button');
+            keyElement.className = 'keyboard-key';
+            keyElement.textContent = key;
+            
+            if (key === '↵' || key === '⌫' || key === 'Espace' || key === '⇧') {
+                keyElement.classList.add('special');
+            }
+            
+            keyElement.addEventListener('click', () => {
+                handleKeyPress(key);
+            });
+            
+            keyboard.appendChild(keyElement);
+        });
+        
+        function handleKeyPress(key) {
+            let activeElement = document.activeElement;
+            
+            if (!activeElement) return;
+            
+            switch(key) {
+                case '⌫':
+                    activeElement.value = activeElement.value.slice(0, -1);
+                    break;
+                case 'Espace':
+                    activeElement.value += ' ';
+                    break;
+                case '↵':
+                    if (activeElement.tagName === 'INPUT') {
+                        activeElement.blur();
+                    }
+                    break;
+                case '⇧':
+                    // Basculer entre majuscules et minuscules
+                    keyboardKeys.forEach((k, i) => {
+                        if (k.length === 1 && k.match(/[a-z]/i)) {
+                            keyboard.children[i].textContent = 
+                                keyboard.children[i].textContent === k.toUpperCase() 
+                                ? k.toLowerCase() 
+                                : k.toUpperCase();
+                        }
+                    });
+                    break;
+                default:
+                    activeElement.value += key;
+            }
+            
+            // Déclencher l'événement input
+            const event = new Event('input', { bubbles: true });
+            activeElement.dispatchEvent(event);
+        }
+        
+        // Toggle clavier
+        document.getElementById('keyboard-toggle').addEventListener('click', () => {
+            keyboard.classList.toggle('active');
+        });
+
+        // ==============================
+        // Personnalisation
+        // ==============================
+        
+        document.querySelectorAll('.theme-color').forEach(color => {
+            color.addEventListener('click', function() {
+                document.querySelectorAll('.theme-color').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                
+                const newColor = this.getAttribute('data-color');
+                document.documentElement.style.setProperty('--accent', newColor);
+                createNotification(`Couleur d'accent changée`);
+            });
+        });
+
+        document.querySelectorAll('.background-option').forEach(bg => {
+            bg.addEventListener('click', function() {
+                document.querySelectorAll('.background-option').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                const newBg = this.getAttribute('data-bg');
+                document.documentElement.style.setProperty('--background-url', `url('${newBg}')`);
+                createNotification(`Fond d'écran changé`);
+            });
+        });
+
+        // Gestion du compte utilisateur
+        document.getElementById('change-password').addEventListener('click', () => {
+            createNotification('Lien de réinitialisation envoyé à votre email');
+        });
+
+        // ==============================
+        // Fonctions utilitaires
+        // ==============================
+        
+        // Fonction de notification
+        function createNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.innerHTML = `<i class="fas fa-info-circle"></i> ${message}`;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 2300);
+        }
+
+        // Initialiser la vue par défaut
+        showView('home');
+        createNotification(translations[systemLanguage]?.welcome || 'Welcome to Blink OS!');
+    </script>
+</body>
+</html>
